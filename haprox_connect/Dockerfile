@@ -1,3 +1,9 @@
+# ARG fuer eine spaetere FROM-Zeile muss VOR dem ersten FROM stehen --
+# zwischen zwei Stages deklariert (wie urspruenglich hier) gilt ein ARG
+# nur fuer den Body der folgenden Stage, nicht fuer deren eigene
+# FROM-Zeile (echter Fehler, beim ersten CI-Lauf gefunden: "UndefinedArgInFrom").
+ARG BUILD_FROM
+
 # Kein lego-Paket in Alpine -- wie am Relay per `go install` gebaut
 # (siehe /root/haprox/README.md), aber als eigener Build-Stage, damit
 # kein Go-Toolchain im finalen Image landet.
@@ -5,7 +11,6 @@ FROM golang:1.23-alpine AS lego-build
 RUN apk add --no-cache git
 RUN GOBIN=/out go install github.com/go-acme/lego/v4/cmd/lego@latest
 
-ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 # wireguard-tools fuer `wg`/`wg-quick`, python3 fuer enroll.py/cert.py/
