@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bashio
+# Startet cert.py (Zertifikatsbezug + Erneuerungs-Schleife, siehe dort).
+# Laeuft dauerhaft (Renewal-Loop), daher kein `pause`-Trick noetig.
+bashio::log.info "Starte Zertifikatsverwaltung..."
+exec python3 /usr/bin/cert.py

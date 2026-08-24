@@ -1,0 +1,71 @@
+#!/usr/bin/with-contenv bashio
+# TLS-Terminierung fuer die zugewiesene Subdomain, Weiterleitung an HA
+# Core (addon.md Abschnitt 5). Drei Schritte: HA-Core-Proxy-Check
+# (Warnung, kein Abbruch), auf das Zertifikat warten, Config rendern,
+# nginx im Vordergrund starten.
+
+STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
+LEGO_PATH="${HAPROX_LEGO_PATH:-/data/lego}"
+
+# --- 1) HA-Core-Trusted-Proxies-Check ---------------------------------
+# addon.md Abschnitt 5 + STATUS.md-Klaerung: configuration.yaml wird
+# NICHT geparst (HA migriert das gerade uneinheitlich ins UI) --
+# stattdessen empirisch pruefen, ob HA Core einen Request mit
+# X-Forwarded-For (genau das, was unser eigenes nginx gleich schickt)
+# mit 400 ablehnt.
+ha_status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
+    -H "X-Forwarded-For: 203.0.113.1" http://127.0.0.1:8123/ || echo "000")
+if [ "${ha_status}" = "400" ]; then
+    bashio::log.warning "Home Assistant Core vertraut diesem Add-on noch nicht als Proxy (400 Bad Request)."
+    bashio::log.warning "Fuege in der configuration.yaml folgenden Block ein (aeltere HA-Versionen):"
+    bashio::log.warning "  http:"
+    bashio::log.warning "    use_x_forwarded_for: true"
+    bashio::log.warning "    trusted_proxies:"
+    bashio::log.warning "      - 172.30.33.0/24"
+    bashio::log.warning "Oder (neuere HA-Versionen, UI): Einstellungen -> System -> Netzwerk ->"
+    bashio::log.warning "HTTP-Server -> 'Trust X-Forwarded-For' aktivieren, 172.30.33.0/24 eintragen."
+    bashio::log.warning "Ohne das schlagen Verbindungen ueber haprox.eu fehl, sobald das Zertifikat steht."
+fi
+
+# --- 2) Auf das Zertifikat warten --------------------------------------
+DOMAIN=$(jq -r '.domain' "${STATE_FILE}")
+CERT_FILE="${LEGO_PATH}/certificates/${DOMAIN}.crt"
+KEY_FILE="${LEGO_PATH}/certificates/${DOMAIN}.key"
+
+if [ ! -f "${CERT_FILE}" ] || [ ! -f "${KEY_FILE}" ]; then
+    bashio::log.info "Warte auf das Zertifikat fuer ${DOMAIN}..."
+    while [ ! -f "${CERT_FILE}" ] || [ ! -f "${KEY_FILE}" ]; do
+        sleep 5
+    done
+fi
+
+# --- 3) Config rendern --------------------------------------------------
+WG_IP=$(jq -r '.wg_ip' "${STATE_FILE}")
+WG_SUBNET=$(jq -r '.wg_subnet' "${STATE_FILE}")
+# Projektweite /24-Konvention (wie ueberall im Relay auch angenommen,
+# siehe /root/haprox/haprox/render.py:wg_ranges()).
+VPS_TUNNEL_IP="${WG_SUBNET%.*}.1"
+
+mkdir -p /run/nginx /etc/nginx/http.d
+cat > /etc/nginx/http.d/haprox.conf <<EOF
+server {
+    listen ${WG_IP}:443 ssl proxy_protocol;
+    server_name ${DOMAIN};
+
+    ssl_certificate     ${CERT_FILE};
+    ssl_certificate_key ${KEY_FILE};
+
+    set_real_ip_from ${VPS_TUNNEL_IP};
+    real_ip_header proxy_protocol;
+
+    location / {
+        proxy_pass http://127.0.0.1:8123;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-For \$remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}
+EOF
+
+bashio::log.info "Starte nginx (${DOMAIN} -> 127.0.0.1:8123)..."
+exec nginx -g "daemon off;"

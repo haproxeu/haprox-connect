@@ -4,16 +4,19 @@ Home-Assistant-Add-on, das eine HA-Instanz per WireGuard mit
 [haprox.eu](https://haprox.eu) verbindet (Selbstregistrierung per
 Enrollment-Code, siehe `addon.md` im Relay-Repo `/root/haprox`).
 
-**Stand:** Gerüst (`addon.md` Abschnitt 11, Schritt 2 von 6) —
-Enrollment, Zustandshaltung, WireGuard-Tunnelaufbau. Noch kein
-Zertifikatsbezug/nginx im Add-on (Schritt 3), kein Heartbeat/keine
+**Stand:** Enrollment, Zustandshaltung, WireGuard-Tunnelaufbau,
+Zertifikatsbezug (`lego --dns acme-dns`) und nginx-TLS-Terminierung
+(`addon.md` Abschnitt 11, Schritt 3 von 6). Noch kein Heartbeat/keine
 Statusentitäten (Schritt 4), Fehlerfälle noch nicht gezielt durchgespielt
 (Schritt 5), kein echter Multi-Arch-Build/Veröffentlichung (Schritt 6).
 
-**Noch nicht getestet:** echter Container-Build, echte Supervisor-API,
-echter Tunnelaufbau von einer realen HA-Box — das Relay (`/root/haprox`)
-hat kein Docker. Nur die Enrollment-HTTP-Logik wurde gegen den echten
-`enroll.haprox.eu`-Endpunkt verifiziert. Siehe `STATUS.md` im
+**Noch nicht getestet:** echter Container-Build (Multi-Stage inkl.
+Go-Cross-Compile), echte Supervisor-API, echter Tunnelaufbau/
+Zertifikatsbezug/nginx-Start im Zusammenspiel auf einer realen HA-Box —
+das Relay (`/root/haprox`) hat kein Docker. Enrollment- und
+Zertifikats-HTTP-Logik wurden aber beide einzeln gegen die echten
+`enroll.haprox.eu`/`acme-dns`-Endpunkte verifiziert (von diesem VPS
+aus, das ja selbst der Tunnel-Endpunkt ist). Siehe `STATUS.md` im
 Relay-Repo für den vollständigen Stand.
 
 Vollständige `DOCS.md` (für Kunden) folgt in Schritt 6.
