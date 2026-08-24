@@ -4,8 +4,11 @@
 # Default-Route-Hijacking; PersistentKeepalive=25).
 #
 # Laeuft als s6-longrun-Dienst, tut aber nur einmalig etwas (wg-quick up)
-# und haelt den Dienst danach ueber `pause` am Leben -- WireGuard selbst
-# braucht keinen dauerhaft laufenden Vordergrund-Prozess.
+# und haelt den Dienst danach ueber `sleep infinity` am Leben -- WireGuard
+# selbst braucht keinen dauerhaft laufenden Vordergrund-Prozess.
+# (Echter Bug beim ersten Test auf echtem HA Supervised: `pause` existiert
+# im hassio-addons/base-Image nicht -- "exec: pause: not found" liess den
+# Dienst im Sekundentakt neu starten.)
 
 STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
 
@@ -13,7 +16,7 @@ if [ ! -f "${STATE_FILE}" ]; then
     # Sollte durch den cont-init.d-Abbruch (10-enroll.sh) nie passieren --
     # defensiv trotzdem eine klare Meldung statt eines Absturzes.
     bashio::log.error "Kein Enrollment-Zustand unter ${STATE_FILE} gefunden. Add-on neu starten."
-    exec pause
+    exec sleep infinity
 fi
 
 WG_IP=$(jq -r '.wg_ip' "${STATE_FILE}")
@@ -38,10 +41,10 @@ EOF
 bashio::log.info "Baue WireGuard-Tunnel auf (${WG_IP} -> ${ENDPOINT})..."
 if ! wg-quick up wg0; then
     bashio::log.error "WireGuard-Tunnel konnte nicht aufgebaut werden. Siehe Log oben."
-    exec pause
+    exec sleep infinity
 fi
 
 date -u +%Y-%m-%dT%H:%M:%SZ > "${HAPROX_TUNNEL_ESTABLISHED_PATH:-/data/tunnel_established}"
 
 bashio::log.info "Tunnel steht."
-exec pause
+exec sleep infinity

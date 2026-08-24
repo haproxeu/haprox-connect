@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1
+
+- Echter Bug, gefunden beim ersten Test auf echtem Home Assistant
+  Supervised: `services.d/wireguard/run` nutzte `pause`, um den Dienst
+  nach dem Tunnelaufbau am Leben zu halten — existiert im
+  `hassio-addons/base`-Image nicht (`exec: pause: not found`), der
+  Dienst lief dadurch in einer Sekundentakt-Neustartschleife. Auf
+  `sleep infinity` gewechselt.
+
 ## 0.4.0
 
 - Repository und Auslieferung: `.github/workflows/build.yml` baut
