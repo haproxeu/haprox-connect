@@ -1,0 +1,9 @@
+build_from:
+  aarch64: ghcr.io/hassio-addons/base/aarch64:15.0.9
+  amd64: ghcr.io/hassio-addons/base/amd64:15.0.9
+
+# ACHTUNG: Version 15.0.9 ist ein Platzhalter zum Planungszeitpunkt --
+# vor dem ersten echten Build gegen die aktuell verfuegbaren Tags unter
+# https://github.com/hassio-addons/addon-base/pkgs/container/base%2Famd64
+# pruefen und ggf. aktualisieren (hier ohne Netzzugriff/Docker nicht
+# verifizierbar, siehe STATUS.md).

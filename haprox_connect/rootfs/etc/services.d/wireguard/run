@@ -1,0 +1,45 @@
+#!/usr/bin/with-contenv bashio
+# Baut den WireGuard-Tunnel aus /data/haprox.json auf (addon.md
+# Abschnitt 5: AllowedIPs *ausschliesslich* wg_subnet, kein
+# Default-Route-Hijacking; PersistentKeepalive=25).
+#
+# Laeuft als s6-longrun-Dienst, tut aber nur einmalig etwas (wg-quick up)
+# und haelt den Dienst danach ueber `pause` am Leben -- WireGuard selbst
+# braucht keinen dauerhaft laufenden Vordergrund-Prozess.
+
+STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
+
+if [ ! -f "${STATE_FILE}" ]; then
+    # Sollte durch den cont-init.d-Abbruch (10-enroll.sh) nie passieren --
+    # defensiv trotzdem eine klare Meldung statt eines Absturzes.
+    bashio::log.error "Kein Enrollment-Zustand unter ${STATE_FILE} gefunden. Add-on neu starten."
+    exec pause
+fi
+
+WG_IP=$(jq -r '.wg_ip' "${STATE_FILE}")
+PRIVATE_KEY=$(jq -r '.private_key' "${STATE_FILE}")
+SERVER_PUBLIC_KEY=$(jq -r '.wg_server_public_key' "${STATE_FILE}")
+ENDPOINT=$(jq -r '.wg_endpoint' "${STATE_FILE}")
+ALLOWED_IPS=$(jq -r '.wg_subnet' "${STATE_FILE}")
+
+umask 077
+cat > /etc/wireguard/wg0.conf <<EOF
+[Interface]
+Address = ${WG_IP}/24
+PrivateKey = ${PRIVATE_KEY}
+
+[Peer]
+PublicKey = ${SERVER_PUBLIC_KEY}
+Endpoint = ${ENDPOINT}
+AllowedIPs = ${ALLOWED_IPS}
+PersistentKeepalive = 25
+EOF
+
+bashio::log.info "Baue WireGuard-Tunnel auf (${WG_IP} -> ${ENDPOINT})..."
+if ! wg-quick up wg0; then
+    bashio::log.error "WireGuard-Tunnel konnte nicht aufgebaut werden. Siehe Log oben."
+    exec pause
+fi
+
+bashio::log.info "Tunnel steht."
+exec pause

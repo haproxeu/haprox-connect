@@ -1,0 +1,40 @@
+name: haprox connect
+version: "0.1.0"
+slug: haprox_connect
+description: Verbindet diese Home-Assistant-Instanz per WireGuard mit haprox.eu
+url: "https://github.com/SET-ME/haprox-connect"
+arch:
+  - aarch64
+  - amd64
+init: false
+
+# Braucht Netzwerkzugriff wie der Host, damit das WireGuard-Interface
+# (wg0) routbar ist -- kein eigenes Docker-Netz-Namespace.
+host_network: true
+privileged:
+  - NET_ADMIN
+devices:
+  - /dev/net/tun
+
+# Fuer Supervisor-API-Zugriff: ha_version lesen, eigene Optionen nach
+# erfolgreichem Enrollment aendern (enrollment_token loeschen, addon.md
+# Abschnitt 2). Dieselbe Berechtigung wird in Schritt 4 fuer die
+# Statusentitaeten gebraucht.
+hassio_api: true
+homeassistant_api: true
+
+# addon.md Abschnitt 2: enrollment_token ist das einzige Pflichtfeld,
+# sichtbar. enroll_url/heartbeat_interval sind ueberschreibbar, aber
+# hinter "Erweitert" versteckt -- das "?"-Suffix im Schema ist der
+# HA-Mechanismus dafuer ("Zeige unbenutzte optionale Konfigurations-
+# optionen"). heartbeat_interval wird in Schritt 2 noch nicht
+# ausgewertet, ist aber schon Teil des Schemas (Schritt 4 baut direkt
+# darauf auf, keine spaetere Schema-Aenderung noetig).
+options:
+  enrollment_token: ""
+  enroll_url: "https://enroll.haprox.eu"
+  heartbeat_interval: 300
+schema:
+  enrollment_token: str
+  enroll_url: url?
+  heartbeat_interval: int(30,3600)?
