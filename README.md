@@ -31,6 +31,12 @@ Ausführliche Anleitung, Statusanzeige und Fehlerbehebung:
 - meldet regelmäßig einen kurzen, anonymisierten Statusbericht über den
   Tunnel ans Relay (Details dazu in `DOCS.md`)
 
+## Verwendete Software
+
+Dieses Add-on baut auf WireGuard, nginx, lego u.a. auf — siehe
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) für die vollständige
+Liste inkl. Lizenzen.
+
 ## Support
 
 support@haprox.eu
