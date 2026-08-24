@@ -1,4 +1,4 @@
 #!/usr/bin/with-contenv bashio
 # s6 ruft dieses Skript beim Stoppen des Dienstes auf -- sauberer Abbau
 # des Tunnels statt ihn einfach haengen zu lassen.
-wg-quick down wg0 2>/dev/null || true
+wg-quick down wghaprox 2>/dev/null || true

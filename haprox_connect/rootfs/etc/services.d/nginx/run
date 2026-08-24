@@ -54,9 +54,9 @@ WG_SUBNET=$(jq -r '.wg_subnet' "${STATE_FILE}")
 # siehe /root/haprox/haprox/render.py:wg_ranges()).
 VPS_TUNNEL_IP="${WG_SUBNET%.*}.1"
 
-if ! ip -4 addr show wg0 2>/dev/null | grep -q "${WG_IP}/"; then
+if ! ip -4 addr show wghaprox 2>/dev/null | grep -q "${WG_IP}/"; then
     bashio::log.info "Warte auf das WireGuard-Interface (${WG_IP})..."
-    while ! ip -4 addr show wg0 2>/dev/null | grep -q "${WG_IP}/"; do
+    while ! ip -4 addr show wghaprox 2>/dev/null | grep -q "${WG_IP}/"; do
         sleep 2
     done
 fi

@@ -75,11 +75,11 @@ def tunnel_established() -> str | None:
 
 
 def tunnel_up() -> bool:
-    """wg0-Handshake juenger als 5 Minuten (grosszuegig gegenueber
+    """wghaprox-Handshake juenger als 5 Minuten (grosszuegig gegenueber
     PersistentKeepalive=25, toleriert kurze Aussetzer ohne sofort
     'tunnel_down' zu melden)."""
     result = subprocess.run(
-        ["wg", "show", "wg0", "latest-handshakes"], capture_output=True, text=True
+        ["wg", "show", "wghaprox", "latest-handshakes"], capture_output=True, text=True
     )
     if result.returncode != 0:
         return False

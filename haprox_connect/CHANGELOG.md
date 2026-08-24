@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.5
+
+- WireGuard-Interface heisst jetzt `wghaprox` statt `wg0`. Grund: das
+  Add-on laeuft mit `host_network: true`, das Interface entsteht also im
+  Netzwerk-Namespace des Hosts, nicht in einem eigenen Docker-Netz.
+  `wg0` ist die mit Abstand haeufigste Standardbezeichnung fuer
+  WireGuard-Interfaces (auch im offiziellen HA-WireGuard-Add-on) --
+  wer auf seiner Box schon ein anderes WireGuard laufen hat oder die
+  Instanz selbst als WireGuard-Server betreibt, haette damit ein reales
+  Namenskollisionsrisiko gehabt. Kein Fix eines gemeldeten Falls,
+  sondern vorbeugend, bevor der erste echte externe Standort das Add-on
+  installiert.
+
 ## 0.4.4
 
 - Echter Bug, live gefunden: `services.d`-Dienste starten ohne

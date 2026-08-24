@@ -6,6 +6,13 @@
 # Laeuft als s6-longrun-Dienst, tut aber nur einmalig etwas (wg-quick up)
 # und haelt den Dienst danach ueber `sleep infinity` am Leben -- WireGuard
 # selbst braucht keinen dauerhaft laufenden Vordergrund-Prozess.
+#
+# Interface heisst bewusst "wghaprox", nicht "wg0" (host_network: true --
+# das Interface entsteht im Netzwerk-Namespace des Hosts, nicht in einem
+# eigenen Docker-Netz). "wg0" ist die haeufigste Standardbezeichnung fuer
+# WireGuard-Interfaces ueberhaupt; laeuft auf der Box schon ein anderes
+# WireGuard (z.B. das offizielle HA-WireGuard-Add-on, oder die Box selbst
+# als WG-Server), waere das sonst ein realer Namenskollisionskandidat.
 # (Echter Bug beim ersten Test auf echtem HA Supervised: `pause` existiert
 # im hassio-addons/base-Image nicht -- "exec: pause: not found" liess den
 # Dienst im Sekundentakt neu starten.)
@@ -26,7 +33,7 @@ ENDPOINT=$(jq -r '.wg_endpoint' "${STATE_FILE}")
 ALLOWED_IPS=$(jq -r '.wg_subnet' "${STATE_FILE}")
 
 umask 077
-cat > /etc/wireguard/wg0.conf <<EOF
+cat > /etc/wireguard/wghaprox.conf <<EOF
 [Interface]
 Address = ${WG_IP}/24
 PrivateKey = ${PRIVATE_KEY}
@@ -39,7 +46,7 @@ PersistentKeepalive = 25
 EOF
 
 bashio::log.info "Baue WireGuard-Tunnel auf (${WG_IP} -> ${ENDPOINT})..."
-if ! wg-quick up wg0; then
+if ! wg-quick up wghaprox; then
     bashio::log.error "WireGuard-Tunnel konnte nicht aufgebaut werden. Siehe Log oben."
     exec sleep infinity
 fi

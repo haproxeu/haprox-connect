@@ -1,5 +1,5 @@
 name: haprox connect
-version: "0.4.4"
+version: "0.4.5"
 slug: haprox_connect
 description: Verbindet diese Home-Assistant-Instanz per WireGuard mit haprox.eu
 url: "https://github.com/haproxeu/haprox-connect"
@@ -14,7 +14,7 @@ arch:
 init: false
 
 # Braucht Netzwerkzugriff wie der Host, damit das WireGuard-Interface
-# (wg0) routbar ist -- kein eigenes Docker-Netz-Namespace.
+# (wghaprox) routbar ist -- kein eigenes Docker-Netz-Namespace.
 host_network: true
 privileged:
   - NET_ADMIN
