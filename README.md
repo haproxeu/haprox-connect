@@ -2,9 +2,9 @@
 
 Home-Assistant-Add-on, das eine HA-Instanz per WireGuard mit
 [haprox.eu](https://haprox.eu) verbindet (Selbstregistrierung per
-Enrollment-Code, siehe `addon.md` im Relay-Repo `/root/haprox`).
+Enrollment-Code, siehe `ADDON-SPEC.md` im Relay-Repo `/root/haprox`).
 
-**Stand:** `addon.md` Abschnitt 11 ist funktional vollständig umgesetzt
+**Stand:** `ADDON-SPEC.md` Abschnitt 11 ist funktional vollständig umgesetzt
 (Schritt 1–5: Enrollment, Zustandshaltung, WireGuard, Zertifikatsbezug
 via `lego --dns acme-dns`, nginx-TLS-Terminierung, Heartbeat +
 Statusentitäten, Standort-Reset, verwaiste-Standorte-Erkennung). Schritt

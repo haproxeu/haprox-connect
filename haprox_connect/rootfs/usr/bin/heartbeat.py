@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Heartbeat + Statusentitaeten fuer haprox-connect (addon.md Abschnitt 6+7).
+"""Heartbeat + Statusentitaeten fuer haprox-connect (ADDON-SPEC.md Abschnitt 6+7).
 
 Laeuft als s6-Longrun-Dienst (etc/services.d/heartbeat/run), meldet sich
 alle heartbeat_interval Sekunden beim Relay und setzt danach die
 Statusentitaeten ueber die Supervisor-API -- unabhaengig davon, ob der
 Heartbeat selbst ankam (die Entitaeten spiegeln den lokal bekannten
-Zustand, addon.md Abschnitt 7: "Gesetzt vom Add-on").
+Zustand, ADDON-SPEC.md Abschnitt 7: "Gesetzt vom Add-on").
 
 sensor.haprox_traffic_month wird bewusst NICHT gesetzt -- die
 Datenquelle (Relay-seitige Traffic-Historie) ist auf spaeter verschoben
@@ -108,7 +108,7 @@ def last_error() -> str | None:
 def fetch_ha_version() -> str:
     try:
         # `or ""`: das Feld selbst kann null sein (nicht nur der Request
-        # fehlschlagen) -- addon.md/heartbeat_web.py erwarten str, kein
+        # fehlschlagen) -- ADDON-SPEC.md/heartbeat_web.py erwarten str, kein
         # str|None (echter Bug beim ersten Test auf echtem Supervised
         # gefunden: /os/info liefert dort null, da kein echtes HAOS).
         return supervisor_request("GET", "/core/info")["data"]["version"] or ""
@@ -183,7 +183,7 @@ def compute_status(tunnel_ok: bool, cert_days: int | None, has_error: bool) -> s
 
 
 def notify_cert_expiry(domain: str, cert_days: int) -> None:
-    """addon.md Abschnitt 8: ab 7 Tagen Restlaufzeit zusaetzlich zur
+    """ADDON-SPEC.md Abschnitt 8: ab 7 Tagen Restlaufzeit zusaetzlich zur
     Log-Warnung eine persistente Benachrichtigung in Home Assistant."""
     if cert_days >= CERT_CRITICAL_DAYS:
         return

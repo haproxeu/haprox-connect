@@ -1,6 +1,6 @@
 name: Build und veröffentlichen
 
-# addon.md Abschnitt 9: Multi-Arch-Images (aarch64, amd64) bauen und in
+# ADDON-SPEC.md Abschnitt 9: Multi-Arch-Images (aarch64, amd64) bauen und in
 # die GitHub Container Registry schieben. Monatlicher Rebuild ist
 # Pflicht, auch ohne Codeänderung -- ein Add-on aus einem Repository,
 # das jahrelang nicht neu gebaut wird, liefert veraltete Bibliotheken

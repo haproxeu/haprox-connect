@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enrollment + Zustandshaltung fuer haprox-connect (addon.md Abschnitt 3+8).
+"""Enrollment + Zustandshaltung fuer haprox-connect (ADDON-SPEC.md Abschnitt 3+8).
 
 Laeuft einmalig beim Add-on-Start (etc/cont-init.d/10-enroll.sh). Stdlib
 only -- kein pip/requests im Image, siehe build.yaml/Dockerfile.
@@ -50,7 +50,7 @@ def fetch_addon_version() -> str:
 
 
 def clear_enrollment_token() -> None:
-    """addon.md Abschnitt 2: der Token wird nach erfolgreichem Enrollment
+    """ADDON-SPEC.md Abschnitt 2: der Token wird nach erfolgreichem Enrollment
     vom Add-on selbst aus der Konfiguration geloescht, damit er nicht
     dauerhaft im Klartext in den Add-on-Optionen steht. Fehler hier sind
     kein Abbruchgrund -- der Zustand ist bereits sicher persistiert."""
@@ -95,7 +95,7 @@ def post_enroll(enroll_url: str, token: str, public_key: str, ha_version: str, a
     )
     try:
         # Kein verify=False-Aequivalent: urllib prueft mit dem
-        # Standard-SSL-Kontext die volle Zertifikatskette (addon.md
+        # Standard-SSL-Kontext die volle Zertifikatskette (ADDON-SPEC.md
         # Abschnitt 3, "TLS").
         with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
             return json.load(resp)

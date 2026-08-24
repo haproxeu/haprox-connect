@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Zertifikatsbezug + Erneuerung fuer haprox-connect (addon.md Abschnitt 5).
+"""Zertifikatsbezug + Erneuerung fuer haprox-connect (ADDON-SPEC.md Abschnitt 5).
 
 Laeuft als s6-Longrun-Dienst (etc/services.d/cert/run), nachdem der
 Tunnel steht (Schritt 2). Nutzt `lego --dns acme-dns` mit den beim
@@ -29,7 +29,7 @@ LAST_ERROR_PATH = Path(os.environ.get("HAPROX_LAST_ERROR_PATH", "/data/last_erro
 
 BACKOFF_START_SECONDS = 5
 BACKOFF_MAX_SECONDS = 300
-RENEW_CHECK_INTERVAL_SECONDS = 12 * 60 * 60  # addon.md Abschnitt 5: kein festes
+RENEW_CHECK_INTERVAL_SECONDS = 12 * 60 * 60  # ADDON-SPEC.md Abschnitt 5: kein festes
 # Erneuerungsintervall hartkodieren -- das entscheidet lego selbst per
 # ARI beim `renew`-Aufruf. Dies ist nur die Pruef-Frequenz.
 
@@ -95,7 +95,7 @@ def reload_nginx() -> None:
 
 
 def _record_error(message: str) -> None:
-    """heartbeat.py meldet den zuletzt bekannten Fehler mit (addon.md
+    """heartbeat.py meldet den zuletzt bekannten Fehler mit (ADDON-SPEC.md
     Abschnitt 6, last_error) -- geleert bei Erfolg."""
     LAST_ERROR_PATH.write_text(message)
 
@@ -106,7 +106,7 @@ def _clear_error() -> None:
 
 def acquire_initial_certificate(state: dict) -> None:
     """Erster Bezug -- Backoff bei Fehlschlag (Tunnel/acme-dns evtl. noch
-    nicht erreichbar), niemals aufgeben (addon.md Abschnitt 8, sinngemaess
+    nicht erreichbar), niemals aufgeben (ADDON-SPEC.md Abschnitt 8, sinngemaess
     auf den Zertifikatsbezug uebertragen: kein Aufgeben, klare
     Log-Zeile statt Stacktrace)."""
     if cert_files_exist(state["domain"]):

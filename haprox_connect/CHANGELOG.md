@@ -56,7 +56,7 @@
   Support-Kontakt). **`ghcr.io/SET-ME/...` und `github.com/SET-ME/...`
   sind noch Platzhalter** — durch den echten GitHub-Benutzernamen/Orga
   ersetzen, sobald das Repository existiert (siehe `STATUS.md` im
-  Relay-Repo). (`addon.md` Abschnitt 11, Schritt 6 von 6 — letzter
+  Relay-Repo). (`ADDON-SPEC.md` Abschnitt 11, Schritt 6 von 6 — letzter
   Schritt.)
 
 ## 0.3.0
@@ -70,7 +70,7 @@
   7 Tagen Zertifikats-Restlaufzeit. `sensor.haprox_traffic_month` noch
   nicht gesetzt (Datenquelle verschoben, siehe `STATUS.md` im
   Relay-Repo). Gemeinsame Supervisor-/Logging-Helfer nach
-  `haprox_common.py` ausgelagert. (`addon.md` Abschnitt 11, Schritt 4
+  `haprox_common.py` ausgelagert. (`ADDON-SPEC.md` Abschnitt 11, Schritt 4
   von 6.)
 
 ## 0.2.0
@@ -80,7 +80,7 @@
   ARI-gesteuert alle 12h geprüft. nginx terminiert TLS auf der
   Tunnel-IP, Weiterleitung an HA Core, mit empirischem Trusted-Proxies-
   Check (kein `configuration.yaml`-Parsing). Noch kein Heartbeat, keine
-  Statusentitäten, keine 20/7-Tage-Ablaufwarnung (siehe `addon.md`
+  Statusentitäten, keine 20/7-Tage-Ablaufwarnung (siehe `ADDON-SPEC.md`
   Abschnitt 11, Schritt 3 von 6).
 
 ## 0.1.0
@@ -88,4 +88,4 @@
 - Add-on-Gerüst: Enrollment gegen `enroll.haprox.eu`, atomare
   Zustandshaltung unter `/data/haprox.json`, WireGuard-Tunnelaufbau.
   Noch kein Zertifikatsbezug, keine nginx-Terminierung, kein Heartbeat
-  (siehe `addon.md` Abschnitt 11, Schritt 2 von 6).
+  (siehe `ADDON-SPEC.md` Abschnitt 11, Schritt 2 von 6).

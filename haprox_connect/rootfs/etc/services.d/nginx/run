@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bashio
 # TLS-Terminierung fuer die zugewiesene Subdomain, Weiterleitung an HA
-# Core (addon.md Abschnitt 5). Vier Schritte: HA-Core-Proxy-Check
+# Core (ADDON-SPEC.md Abschnitt 5). Vier Schritte: HA-Core-Proxy-Check
 # (Warnung, kein Abbruch), auf das Zertifikat warten, auf das
 # WireGuard-Interface warten, Config rendern + nginx im Vordergrund
 # starten.
@@ -9,7 +9,7 @@ STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
 LEGO_PATH="${HAPROX_LEGO_PATH:-/data/lego}"
 
 # --- 1) HA-Core-Trusted-Proxies-Check ---------------------------------
-# addon.md Abschnitt 5 + STATUS.md-Klaerung: configuration.yaml wird
+# ADDON-SPEC.md Abschnitt 5 + STATUS.md-Klaerung: configuration.yaml wird
 # NICHT geparst (HA migriert das gerade uneinheitlich ins UI) --
 # stattdessen empirisch pruefen, ob HA Core einen Request mit
 # X-Forwarded-For (genau das, was unser eigenes nginx gleich schickt)

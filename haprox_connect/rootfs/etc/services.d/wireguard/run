@@ -1,5 +1,5 @@
 #!/usr/bin/with-contenv bashio
-# Baut den WireGuard-Tunnel aus /data/haprox.json auf (addon.md
+# Baut den WireGuard-Tunnel aus /data/haprox.json auf (ADDON-SPEC.md
 # Abschnitt 5: AllowedIPs *ausschliesslich* wg_subnet, kein
 # Default-Route-Hijacking; PersistentKeepalive=25).
 #
