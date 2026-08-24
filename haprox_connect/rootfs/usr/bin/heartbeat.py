@@ -107,21 +107,25 @@ def last_error() -> str | None:
 
 def fetch_ha_version() -> str:
     try:
-        return supervisor_request("GET", "/core/info")["data"]["version"]
+        # `or ""`: das Feld selbst kann null sein (nicht nur der Request
+        # fehlschlagen) -- addon.md/heartbeat_web.py erwarten str, kein
+        # str|None (echter Bug beim ersten Test auf echtem Supervised
+        # gefunden: /os/info liefert dort null, da kein echtes HAOS).
+        return supervisor_request("GET", "/core/info")["data"]["version"] or ""
     except Exception:
         return ""
 
 
 def fetch_addon_version() -> str:
     try:
-        return supervisor_request("GET", "/addons/self/info")["data"]["version"]
+        return supervisor_request("GET", "/addons/self/info")["data"]["version"] or ""
     except Exception:
         return ""
 
 
 def fetch_ha_os_version() -> str:
     try:
-        return supervisor_request("GET", "/os/info")["data"]["version"]
+        return supervisor_request("GET", "/os/info")["data"]["version"] or ""
     except Exception:
         return ""
 

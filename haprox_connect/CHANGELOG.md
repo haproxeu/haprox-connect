@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.2
+
+- Echter Bug, gefunden im selben Testlauf: `heartbeat.py` schickte
+  `ha_os_version: null`, sobald die Supervisor-API dafür kein Feld
+  liefert (z. B. auf "Home Assistant Supervised" auf generischem Debian
+  statt echtem HAOS — genau die Umgebung, in der getestet wurde) — das
+  Response-Schema (`str`, nicht `str | None`) lehnte den Heartbeat
+  daraufhin mit `422 Unprocessable Entity` ab. `fetch_ha_version()`/
+  `fetch_addon_version()`/`fetch_ha_os_version()` fangen ein `null`-Feld
+  jetzt selbst ab (`or ""`), nicht nur einen fehlgeschlagenen Request.
+
 ## 0.4.1
 
 - Echter Bug, gefunden beim ersten Test auf echtem Home Assistant
