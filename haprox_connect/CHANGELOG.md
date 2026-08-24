@@ -9,9 +9,7 @@
   WireGuard-Interfaces (auch im offiziellen HA-WireGuard-Add-on) --
   wer auf seiner Box schon ein anderes WireGuard laufen hat oder die
   Instanz selbst als WireGuard-Server betreibt, haette damit ein reales
-  Namenskollisionsrisiko gehabt. Kein Fix eines gemeldeten Falls,
-  sondern vorbeugend, bevor der erste echte externe Standort das Add-on
-  installiert.
+  Namenskollisionsrisiko gehabt.
 
 ## 0.4.4
 

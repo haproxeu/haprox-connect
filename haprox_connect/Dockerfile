@@ -4,9 +4,9 @@
 # FROM-Zeile (echter Fehler, beim ersten CI-Lauf gefunden: "UndefinedArgInFrom").
 ARG BUILD_FROM
 
-# Kein lego-Paket in Alpine -- wie am Relay per `go install` gebaut
-# (siehe /root/haprox/README.md), aber als eigener Build-Stage, damit
-# kein Go-Toolchain im finalen Image landet. 1.25 ist lego@latest's
+# Kein lego-Paket in Alpine -- per `go install` aus dem offiziellen
+# Quellcode gebaut, als eigener Build-Stage, damit kein Go-Toolchain im
+# finalen Image landet. 1.25 ist lego@latest's
 # tatsaechliche Mindestanforderung (im ersten echten CI-Lauf mit 1.23
 # gescheitert: "requires go >= 1.25.0") -- als Minor-Tag (nicht z.B.
 # 1.25.3) gewaehlt, damit spaetere Patch-Releases beim naechsten
@@ -21,8 +21,7 @@ FROM ${BUILD_FROM}
 # heartbeat.py, jq fuer das Auslesen von /data/haprox.json in den
 # Shell-Services, nginx fuer die TLS-Terminierung, curl fuer den
 # HA-Core-Proxy-Check, openssl fuer die Zertifikats-Restlaufzeit im
-# Heartbeat -- sonst nichts (kein pip/requests, siehe
-# CLAUDE.md-Philosophie des Schwester-Repos /root/haprox).
+# Heartbeat -- sonst nichts (kein pip/requests, minimale Abhaengigkeiten).
 RUN apk add --no-cache \
     wireguard-tools \
     python3 \

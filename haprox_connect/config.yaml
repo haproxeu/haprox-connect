@@ -3,10 +3,10 @@ version: "0.4.5"
 slug: haprox_connect
 description: Verbindet diese Home-Assistant-Instanz per WireGuard mit haprox.eu
 url: "https://github.com/haproxeu/haprox-connect"
-# Von der CI gebaute Multi-Arch-Images (.github/workflows/build.yml,
-# ADDON-SPEC.md Abschnitt 9) -- Supervisor zieht das fertige Image statt es
-# lokal auf der Box zu bauen. Pfad muss exakt zu github.repository im
-# Workflow passen (ghcr.io/<owner>/<repo>/<arch>).
+# Von der CI gebaute Multi-Arch-Images (.github/workflows/build.yml) --
+# Supervisor zieht das fertige Image statt es lokal auf der Box zu
+# bauen. Pfad muss exakt zu github.repository im Workflow passen
+# (ghcr.io/<owner>/<repo>/<arch>).
 image: "ghcr.io/haproxeu/haprox-connect/{arch}"
 arch:
   - aarch64
@@ -22,19 +22,15 @@ devices:
   - /dev/net/tun
 
 # Fuer Supervisor-API-Zugriff: ha_version lesen, eigene Optionen nach
-# erfolgreichem Enrollment aendern (enrollment_token loeschen, ADDON-SPEC.md
-# Abschnitt 2). Dieselbe Berechtigung wird in Schritt 4 fuer die
-# Statusentitaeten gebraucht.
+# erfolgreichem Enrollment aendern (enrollment_token loeschen). Dieselbe
+# Berechtigung wird auch fuer die Statusentitaeten gebraucht.
 hassio_api: true
 homeassistant_api: true
 
-# ADDON-SPEC.md Abschnitt 2: enrollment_token ist das einzige Pflichtfeld,
-# sichtbar. enroll_url/heartbeat_interval sind ueberschreibbar, aber
-# hinter "Erweitert" versteckt -- das "?"-Suffix im Schema ist der
-# HA-Mechanismus dafuer ("Zeige unbenutzte optionale Konfigurations-
-# optionen"). heartbeat_interval wird in Schritt 2 noch nicht
-# ausgewertet, ist aber schon Teil des Schemas (Schritt 4 baut direkt
-# darauf auf, keine spaetere Schema-Aenderung noetig).
+# enrollment_token ist das einzige Pflichtfeld, sichtbar. enroll_url/
+# heartbeat_interval sind ueberschreibbar, aber hinter "Erweitert"
+# versteckt -- das "?"-Suffix im Schema ist der HA-Mechanismus dafuer
+# ("Zeige unbenutzte optionale Konfigurationsoptionen").
 options:
   enrollment_token: ""
   enroll_url: "https://enroll.haprox.eu"

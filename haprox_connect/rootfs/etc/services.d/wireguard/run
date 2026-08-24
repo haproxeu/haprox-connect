@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bashio
-# Baut den WireGuard-Tunnel aus /data/haprox.json auf (ADDON-SPEC.md
-# Abschnitt 5: AllowedIPs *ausschliesslich* wg_subnet, kein
-# Default-Route-Hijacking; PersistentKeepalive=25).
+# Baut den WireGuard-Tunnel aus /data/haprox.json auf. AllowedIPs
+# bewusst *ausschliesslich* wg_subnet, kein Default-Route-Hijacking;
+# PersistentKeepalive=25.
 #
 # Laeuft als s6-longrun-Dienst, tut aber nur einmalig etwas (wg-quick up)
 # und haelt den Dienst danach ueber `sleep infinity` am Leben -- WireGuard

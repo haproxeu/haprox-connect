@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Enrollment + Zustandshaltung fuer haprox-connect (ADDON-SPEC.md Abschnitt 3+8).
+"""Enrollment + Zustandshaltung fuer haprox-connect.
 
 Laeuft einmalig beim Add-on-Start (etc/cont-init.d/10-enroll.sh). Stdlib
 only -- kein pip/requests im Image, siehe build.yaml/Dockerfile.
 
 Pfade sind ueber Umgebungsvariablen umbiegbar (HAPROX_OPTIONS_PATH,
 HAPROX_STATE_PATH), damit sich das Skript ausserhalb eines echten
-HA-Add-on-Containers testen laesst (siehe Plan, Abschnitt Verifikation).
+HA-Add-on-Containers testen laesst.
 """
 
 from __future__ import annotations
@@ -50,10 +50,10 @@ def fetch_addon_version() -> str:
 
 
 def clear_enrollment_token() -> None:
-    """ADDON-SPEC.md Abschnitt 2: der Token wird nach erfolgreichem Enrollment
-    vom Add-on selbst aus der Konfiguration geloescht, damit er nicht
-    dauerhaft im Klartext in den Add-on-Optionen steht. Fehler hier sind
-    kein Abbruchgrund -- der Zustand ist bereits sicher persistiert."""
+    """Der Token wird nach erfolgreichem Enrollment vom Add-on selbst aus
+    der Konfiguration geloescht, damit er nicht dauerhaft im Klartext in
+    den Add-on-Optionen steht. Fehler hier sind kein Abbruchgrund -- der
+    Zustand ist bereits sicher persistiert."""
     try:
         supervisor_request("POST", "/addons/self/options", {"options": {"enrollment_token": ""}})
     except Exception as exc:
@@ -95,8 +95,7 @@ def post_enroll(enroll_url: str, token: str, public_key: str, ha_version: str, a
     )
     try:
         # Kein verify=False-Aequivalent: urllib prueft mit dem
-        # Standard-SSL-Kontext die volle Zertifikatskette (ADDON-SPEC.md
-        # Abschnitt 3, "TLS").
+        # Standard-SSL-Kontext die volle Zertifikatskette.
         with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
             return json.load(resp)
     except urllib.error.HTTPError as exc:
@@ -145,8 +144,8 @@ def enroll(options: dict) -> dict:
 
 
 def write_state_atomic(state: dict) -> None:
-    """Abschnitt 8, 'Abgebrochenes Enrollment': die Antwort wird als
-    Erstes vollstaendig persistiert, erst danach wird irgendetwas
+    """Fuer den Fall eines abgebrochenen Enrollments: die Antwort wird
+    als Erstes vollstaendig persistiert, erst danach wird irgendetwas
     konfiguriert. Temp-Datei + os.replace fuer Atomaritaet, Modus 600
     weil der private Schluessel drinsteht."""
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)

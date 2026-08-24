@@ -34,7 +34,7 @@ unserer eigenen Prüfung (Stand: siehe Git-Historie dieser Datei).
 
 ## Was NICHT hierher gehört
 
-Der Relay-seitige Code (`/root/haprox`, separates, privates Repository)
+Der Code des Relay-Servers ist ein separates, privates Repository und
 wird nirgends an Kunden ausgeliefert — reiner interner Serverbetrieb,
 keine Distribution im lizenzrechtlichen Sinne, daher keine
 Attributionspflicht dafür.
