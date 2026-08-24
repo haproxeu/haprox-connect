@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.3
+
+- Wichtiger echter Bug, live gefunden: Alpines nginx-Paket bringt eine
+  `http.d/default.conf` mit, die `0.0.0.0:80` belegt. Wegen
+  `host_network: true` ist das der **Host**-Port -- auf der Test-VM
+  stellte sich heraus, dass Port 80 dort bereits von Home Assistant
+  Core selbst belegt ist, unsere Stock-`default.conf` kollidierte
+  direkt damit (`bind() to 0.0.0.0:80 failed: Address in use`,
+  Nginx-Dienst startete in einer Schleife). Wir brauchen Port 80 nie
+  (nur `wg_ip:443`) -- die mitgelieferte `default.conf` wird jetzt im
+  Dockerfile entfernt.
+
 ## 0.4.2
 
 - Echter Bug, gefunden im selben Testlauf: `heartbeat.py` schickte

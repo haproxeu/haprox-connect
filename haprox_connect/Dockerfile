@@ -31,6 +31,15 @@ RUN apk add --no-cache \
     curl \
     openssl
 
+# Alpines nginx-Paket bringt eine http.d/default.conf mit, die
+# 0.0.0.0:80 belegt -- wegen host_network:true ist das der HOST-Port,
+# nicht irgendein isoliertes Docker-Netz. Echter Bug, live auf dem
+# ersten Supervised-Test gefunden: Port 80 auf einer echten HA-Box
+# gehoert bereits Home Assistant Core selbst -- unsere default.conf
+# haette dagegen kollidiert. Wir brauchen Port 80 nie (nur wg_ip:443),
+# also die Stock-Config entfernen statt sie zu ueberschreiben.
+RUN rm -f /etc/nginx/http.d/default.conf
+
 COPY --from=lego-build /out/lego /usr/local/bin/lego
 COPY rootfs /
 
