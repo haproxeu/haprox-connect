@@ -2,13 +2,12 @@ name: haprox connect
 version: "0.4.0"
 slug: haprox_connect
 description: Verbindet diese Home-Assistant-Instanz per WireGuard mit haprox.eu
-url: "https://github.com/SET-ME/haprox-connect"
+url: "https://github.com/haproxeu/haprox-connect"
 # Von der CI gebaute Multi-Arch-Images (.github/workflows/build.yml,
 # addon.md Abschnitt 9) -- Supervisor zieht das fertige Image statt es
 # lokal auf der Box zu bauen. Pfad muss exakt zu github.repository im
-# Workflow passen: SET-ME durch den echten GitHub-Benutzernamen/Orga
-# ersetzen, sobald das Repository existiert.
-image: "ghcr.io/SET-ME/haprox-connect/{arch}"
+# Workflow passen (ghcr.io/<owner>/<repo>/<arch>).
+image: "ghcr.io/haproxeu/haprox-connect/{arch}"
 arch:
   - aarch64
   - amd64

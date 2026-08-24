@@ -8,18 +8,18 @@ Enrollment-Code, siehe `addon.md` im Relay-Repo `/root/haprox`).
 (Schritt 1–5: Enrollment, Zustandshaltung, WireGuard, Zertifikatsbezug
 via `lego --dns acme-dns`, nginx-TLS-Terminierung, Heartbeat +
 Statusentitäten, Standort-Reset, verwaiste-Standorte-Erkennung). Schritt
-6 (Repository/Pipeline/Doku) ist lokal vorbereitet: `.github/workflows/
-build.yml` (Multi-Arch-Build + monatlicher Pflicht-Rebuild), `DOCS.md`
-(Kundendokumentation). **Noch offen, bevor das real funktioniert:**
+6 (Repository/Pipeline/Doku): GitHub-Konto `haproxeu` steht,
+`SET-ME`-Platzhalter in `config.yaml`/`repository.yaml` ersetzt
+(`github.com/haproxeu/haprox-connect`, `ghcr.io/haproxeu/haprox-connect`).
+`.github/workflows/build.yml` (Multi-Arch-Build + monatlicher
+Pflicht-Rebuild), `DOCS.md` (Kundendokumentation). **Noch offen, bevor
+das real funktioniert:**
 
-- `ghcr.io/SET-ME/...` (`config.yaml: image`) und
-  `github.com/SET-ME/...` (`config.yaml`/`repository.yaml: url`) sind
-  Platzhalter — durch den echten GitHub-Benutzernamen/Orga ersetzen.
-- Repository muss real auf GitHub existieren, damit der Workflow
-  überhaupt laufen kann — bewusst noch nicht automatisch angelegt/
-  gepusht (Rücksprache mit dem Nutzer, siehe `STATUS.md` im Relay-Repo).
+- Repository real auf GitHub anlegen und dieses lokale Repo dorthin
+  pushen.
 - `support@haprox.eu` (in `DOCS.md`) muss als Postfach/Alias im
   bestehenden Migadu-Setup noch angelegt werden.
+- Ersten echten CI-Lauf beobachten (siehe unten, ungetestet).
 
 `sensor.haprox_traffic_month` bewusst nicht gesetzt (Datenquelle
 — relay-seitige Traffic-Historie — auf später verschoben).
