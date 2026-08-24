@@ -8,7 +8,7 @@ name: Build und veröffentlichen
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "haprox_connect/**"
       - ".github/workflows/build.yml"
