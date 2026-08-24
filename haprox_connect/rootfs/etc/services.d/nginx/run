@@ -1,8 +1,9 @@
 #!/usr/bin/with-contenv bashio
 # TLS-Terminierung fuer die zugewiesene Subdomain, Weiterleitung an HA
-# Core (addon.md Abschnitt 5). Drei Schritte: HA-Core-Proxy-Check
-# (Warnung, kein Abbruch), auf das Zertifikat warten, Config rendern,
-# nginx im Vordergrund starten.
+# Core (addon.md Abschnitt 5). Vier Schritte: HA-Core-Proxy-Check
+# (Warnung, kein Abbruch), auf das Zertifikat warten, auf das
+# WireGuard-Interface warten, Config rendern + nginx im Vordergrund
+# starten.
 
 STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
 LEGO_PATH="${HAPROX_LEGO_PATH:-/data/lego}"
@@ -39,13 +40,28 @@ if [ ! -f "${CERT_FILE}" ] || [ ! -f "${KEY_FILE}" ]; then
     done
 fi
 
-# --- 3) Config rendern --------------------------------------------------
+# --- 3) Auf das WireGuard-Interface warten -----------------------------
+# Echter Bug beim Test auf echtem HA Supervised: services.d-Dienste
+# starten ohne garantierte Reihenfolge -- existierte das Zertifikat
+# bereits (Neustart-Fall), versuchte nginx oft schneller zu binden, als
+# services.d/wireguard/run das Interface hochgefahren hatte
+# ("bind() to <wg_ip>:443 failed: Address not available"). Warten, bis
+# die Adresse wirklich auf einem Interface sitzt, nicht nur aufs
+# Zertifikat verlassen.
 WG_IP=$(jq -r '.wg_ip' "${STATE_FILE}")
 WG_SUBNET=$(jq -r '.wg_subnet' "${STATE_FILE}")
 # Projektweite /24-Konvention (wie ueberall im Relay auch angenommen,
 # siehe /root/haprox/haprox/render.py:wg_ranges()).
 VPS_TUNNEL_IP="${WG_SUBNET%.*}.1"
 
+if ! ip -4 addr show wg0 2>/dev/null | grep -q "${WG_IP}/"; then
+    bashio::log.info "Warte auf das WireGuard-Interface (${WG_IP})..."
+    while ! ip -4 addr show wg0 2>/dev/null | grep -q "${WG_IP}/"; do
+        sleep 2
+    done
+fi
+
+# --- 4) Config rendern --------------------------------------------------
 mkdir -p /run/nginx /etc/nginx/http.d
 cat > /etc/nginx/http.d/haprox.conf <<EOF
 server {

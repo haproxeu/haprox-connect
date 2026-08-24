@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.4
+
+- Echter Bug, live gefunden: `services.d`-Dienste starten ohne
+  garantierte Reihenfolge. War das Zertifikat schon vorhanden (jeder
+  Neustart nach dem ersten Erfolg), versuchte `nginx` teils schneller
+  an `wg_ip:443` zu binden, als `wireguard/run` das Interface
+  hochgefahren hatte (`bind() to <wg_ip>:443 failed: Address not
+  available`) — bisher nur durch s6s automatischen Neustart kaschiert,
+  kein verlässliches Verhalten. `nginx/run` wartet jetzt zusätzlich
+  aktiv, bis die Adresse wirklich auf `wg0` sitzt, bevor gerendert und
+  gestartet wird.
+
 ## 0.4.3
 
 - Wichtiger echter Bug, live gefunden: Alpines nginx-Paket bringt eine
