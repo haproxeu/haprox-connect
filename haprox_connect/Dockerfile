@@ -6,8 +6,12 @@ ARG BUILD_FROM
 
 # Kein lego-Paket in Alpine -- wie am Relay per `go install` gebaut
 # (siehe /root/haprox/README.md), aber als eigener Build-Stage, damit
-# kein Go-Toolchain im finalen Image landet.
-FROM golang:1.23-alpine AS lego-build
+# kein Go-Toolchain im finalen Image landet. 1.25 ist lego@latest's
+# tatsaechliche Mindestanforderung (im ersten echten CI-Lauf mit 1.23
+# gescheitert: "requires go >= 1.25.0") -- als Minor-Tag (nicht z.B.
+# 1.25.3) gewaehlt, damit spaetere Patch-Releases beim naechsten
+# Pflicht-Rebuild automatisch mitkommen.
+FROM golang:1.25-alpine AS lego-build
 RUN apk add --no-cache git
 RUN GOBIN=/out go install github.com/go-acme/lego/v4/cmd/lego@latest
 
