@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0
+
+- Repository und Auslieferung: `.github/workflows/build.yml` baut
+  Multi-Arch-Images (aarch64, amd64) und schiebt sie nach GHCR, inkl.
+  Pflicht-Rebuild am 1. jedes Monats (Sicherheitsupdates der
+  Basis-Images, auch ohne Codeänderung). `config.yaml` zieht jetzt das
+  von der CI gebaute Image (`image:`-Feld) statt lokal auf der Box zu
+  bauen. Vollständige `DOCS.md` für Kunden (Funktionsweise, Heartbeat-
+  Inhalt, Fehlerbehebung inkl. Standort-Reset, sauberer Ausstieg,
+  Support-Kontakt). **`ghcr.io/SET-ME/...` und `github.com/SET-ME/...`
+  sind noch Platzhalter** — durch den echten GitHub-Benutzernamen/Orga
+  ersetzen, sobald das Repository existiert (siehe `STATUS.md` im
+  Relay-Repo). (`addon.md` Abschnitt 11, Schritt 6 von 6 — letzter
+  Schritt.)
+
 ## 0.3.0
 
 - Heartbeat und Statusentitäten: `heartbeat.py` meldet sich periodisch
