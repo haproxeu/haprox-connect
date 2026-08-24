@@ -20,45 +20,31 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import haprox_common
+from haprox_common import log, supervisor_request
+
 OPTIONS_PATH = Path(os.environ.get("HAPROX_OPTIONS_PATH", "/data/options.json"))
-STATE_PATH = Path(os.environ.get("HAPROX_STATE_PATH", "/data/haprox.json"))
-SUPERVISOR_API = os.environ.get("HAPROX_SUPERVISOR_API", "http://supervisor")
-SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+STATE_PATH = haprox_common.STATE_PATH
 
 BACKOFF_START_SECONDS = 5
 BACKOFF_MAX_SECONDS = 300
 REQUEST_TIMEOUT_SECONDS = 15
 
 
-def log(message: str) -> None:
-    print(f"[haprox-connect] {message}", flush=True)
-
-
 def load_options() -> dict:
     return json.loads(OPTIONS_PATH.read_text())
 
 
-def _supervisor_request(method: str, path: str, body: dict | None = None) -> dict:
-    req = urllib.request.Request(f"{SUPERVISOR_API}{path}", method=method)
-    req.add_header("Authorization", f"Bearer {SUPERVISOR_TOKEN}")
-    data = None
-    if body is not None:
-        data = json.dumps(body).encode()
-        req.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(req, data=data, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
-        return json.load(resp)
-
-
 def fetch_ha_version() -> str:
     try:
-        return _supervisor_request("GET", "/core/info")["data"]["version"]
+        return supervisor_request("GET", "/core/info")["data"]["version"]
     except Exception:
         return ""
 
 
 def fetch_addon_version() -> str:
     try:
-        return _supervisor_request("GET", "/addons/self/info")["data"]["version"]
+        return supervisor_request("GET", "/addons/self/info")["data"]["version"]
     except Exception:
         return ""
 
@@ -69,9 +55,9 @@ def clear_enrollment_token() -> None:
     dauerhaft im Klartext in den Add-on-Optionen steht. Fehler hier sind
     kein Abbruchgrund -- der Zustand ist bereits sicher persistiert."""
     try:
-        _supervisor_request("POST", "/addons/self/options", {"options": {"enrollment_token": ""}})
+        supervisor_request("POST", "/addons/self/options", {"options": {"enrollment_token": ""}})
     except Exception as exc:
-        log(f"Konnte den Enrollment-Code nicht aus der Konfiguration loeschen: {exc}")
+        log("enroll", f"Konnte den Enrollment-Code nicht aus der Konfiguration loeschen: {exc}")
 
 
 def generate_keypair() -> tuple[str, str]:
@@ -124,7 +110,7 @@ def post_enroll(enroll_url: str, token: str, public_key: str, ha_version: str, a
 def enroll(options: dict) -> dict:
     token = options.get("enrollment_token", "").strip()
     if not token:
-        log("Kein Code eingetragen. Trage einen Enrollment-Code ein und starte das Add-on neu.")
+        log("enroll", "Kein Code eingetragen. Trage einen Enrollment-Code ein und starte das Add-on neu.")
         sys.exit(1)
 
     enroll_url = options.get("enroll_url") or "https://enroll.haprox.eu"
@@ -140,16 +126,17 @@ def enroll(options: dict) -> dict:
             break
         except InvalidToken:
             log(
+                "enroll",
                 "Der Code wurde nicht akzeptiert. Codes sind 30 Minuten gueltig "
                 "und koennen nur einmal verwendet werden. Lass dir einen neuen "
-                "Code geben."
+                "Code geben.",
             )
             sys.exit(1)
         except RateLimited:
-            log("Zu viele Versuche in kurzer Zeit. Bitte spaeter erneut versuchen.")
+            log("enroll", "Zu viele Versuche in kurzer Zeit. Bitte spaeter erneut versuchen.")
             sys.exit(1)
         except urllib.error.URLError as exc:
-            log(f"Relay nicht erreichbar ({exc}). Versuche es in {delay}s erneut.")
+            log("enroll", f"Relay nicht erreichbar ({exc}). Versuche es in {delay}s erneut.")
             time.sleep(delay)
             delay = min(delay * 2, BACKOFF_MAX_SECONDS)
 
@@ -171,13 +158,13 @@ def write_state_atomic(state: dict) -> None:
 
 def main() -> None:
     if STATE_PATH.exists():
-        log("Bereits registriert, ueberspringe Enrollment.")
+        log("enroll", "Bereits registriert, ueberspringe Enrollment.")
         return
 
     options = load_options()
     state = enroll(options)
     write_state_atomic(state)
-    log(f"Standort registriert: {state['domain']}")
+    log("enroll", f"Standort registriert: {state['domain']}")
     clear_enrollment_token()
 
 

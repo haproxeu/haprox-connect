@@ -41,5 +41,7 @@ if ! wg-quick up wg0; then
     exec pause
 fi
 
+date -u +%Y-%m-%dT%H:%M:%SZ > "${HAPROX_TUNNEL_ESTABLISHED_PATH:-/data/tunnel_established}"
+
 bashio::log.info "Tunnel steht."
 exec pause

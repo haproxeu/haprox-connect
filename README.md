@@ -5,10 +5,11 @@ Home-Assistant-Add-on, das eine HA-Instanz per WireGuard mit
 Enrollment-Code, siehe `addon.md` im Relay-Repo `/root/haprox`).
 
 **Stand:** Enrollment, Zustandshaltung, WireGuard-Tunnelaufbau,
-Zertifikatsbezug (`lego --dns acme-dns`) und nginx-TLS-Terminierung
-(`addon.md` Abschnitt 11, Schritt 3 von 6). Noch kein Heartbeat/keine
-Statusentitäten (Schritt 4), Fehlerfälle noch nicht gezielt durchgespielt
-(Schritt 5), kein echter Multi-Arch-Build/Veröffentlichung (Schritt 6).
+Zertifikatsbezug (`lego --dns acme-dns`), nginx-TLS-Terminierung,
+Heartbeat und Statusentitäten (`addon.md` Abschnitt 11, Schritt 4 von 6).
+`sensor.haprox_traffic_month` noch nicht gesetzt (Datenquelle
+verschoben). Fehlerfälle noch nicht gezielt durchgespielt (Schritt 5),
+kein echter Multi-Arch-Build/Veröffentlichung (Schritt 6).
 
 **Noch nicht getestet:** echter Container-Build (Multi-Stage inkl.
 Go-Cross-Compile), echte Supervisor-API, echter Tunnelaufbau/

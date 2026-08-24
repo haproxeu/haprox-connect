@@ -21,23 +21,17 @@ import subprocess
 import time
 from pathlib import Path
 
-STATE_PATH = Path(os.environ.get("HAPROX_STATE_PATH", "/data/haprox.json"))
+from haprox_common import load_state, log
+
 LEGO_PATH = Path(os.environ.get("HAPROX_LEGO_PATH", "/data/lego"))
 LEGO_BIN = os.environ.get("HAPROX_LEGO_BIN", "/usr/local/bin/lego")
+LAST_ERROR_PATH = Path(os.environ.get("HAPROX_LAST_ERROR_PATH", "/data/last_error"))
 
 BACKOFF_START_SECONDS = 5
 BACKOFF_MAX_SECONDS = 300
 RENEW_CHECK_INTERVAL_SECONDS = 12 * 60 * 60  # addon.md Abschnitt 5: kein festes
 # Erneuerungsintervall hartkodieren -- das entscheidet lego selbst per
 # ARI beim `renew`-Aufruf. Dies ist nur die Pruef-Frequenz.
-
-
-def log(message: str) -> None:
-    print(f"[haprox-connect/cert] {message}", flush=True)
-
-
-def load_state() -> dict:
-    return json.loads(STATE_PATH.read_text())
 
 
 def storage_path() -> Path:
@@ -97,7 +91,17 @@ def reload_nginx() -> None:
     try:
         subprocess.run(["nginx", "-s", "reload"], capture_output=True, text=True, timeout=10)
     except Exception as exc:
-        log(f"nginx-Reload nach Erneuerung fehlgeschlagen (evtl. laeuft nginx noch nicht): {exc}")
+        log("cert", f"nginx-Reload nach Erneuerung fehlgeschlagen (evtl. laeuft nginx noch nicht): {exc}")
+
+
+def _record_error(message: str) -> None:
+    """heartbeat.py meldet den zuletzt bekannten Fehler mit (addon.md
+    Abschnitt 6, last_error) -- geleert bei Erfolg."""
+    LAST_ERROR_PATH.write_text(message)
+
+
+def _clear_error() -> None:
+    LAST_ERROR_PATH.unlink(missing_ok=True)
 
 
 def acquire_initial_certificate(state: dict) -> None:
@@ -106,7 +110,8 @@ def acquire_initial_certificate(state: dict) -> None:
     auf den Zertifikatsbezug uebertragen: kein Aufgeben, klare
     Log-Zeile statt Stacktrace)."""
     if cert_files_exist(state["domain"]):
-        log(f"Zertifikat fuer {state['domain']} existiert bereits.")
+        log("cert", f"Zertifikat fuer {state['domain']} existiert bereits.")
+        _clear_error()
         return
 
     write_acme_dns_storage(state)
@@ -114,13 +119,16 @@ def acquire_initial_certificate(state: dict) -> None:
     while True:
         result = lego_run(state)
         if result.returncode == 0:
-            log(f"Zertifikat fuer {state['domain']} erfolgreich bezogen.")
+            log("cert", f"Zertifikat fuer {state['domain']} erfolgreich bezogen.")
+            _clear_error()
             return
+        error_line = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else "kein Fehlertext"
         log(
+            "cert",
             f"Zertifikatsbezug fehlgeschlagen (lego-Exitcode {result.returncode}): "
-            f"{result.stderr.strip().splitlines()[-1] if result.stderr.strip() else 'kein Fehlertext'}. "
-            f"Versuche es in {delay}s erneut."
+            f"{error_line}. Versuche es in {delay}s erneut.",
         )
+        _record_error(f"Zertifikatsbezug fehlgeschlagen: {error_line}")
         time.sleep(delay)
         delay = min(delay * 2, BACKOFF_MAX_SECONDS)
 
@@ -130,11 +138,14 @@ def renewal_loop(state: dict) -> None:
         time.sleep(RENEW_CHECK_INTERVAL_SECONDS)
         result = lego_renew(state)
         if result.returncode != 0:
-            log(f"Erneuerungs-Check fehlgeschlagen: {result.stderr.strip()}")
+            error_line = result.stderr.strip()
+            log("cert", f"Erneuerungs-Check fehlgeschlagen: {error_line}")
+            _record_error(f"Erneuerung fehlgeschlagen: {error_line}")
             continue
+        _clear_error()
         if "no renewal" in result.stdout.lower() or "not needed" in result.stdout.lower():
             continue
-        log(f"Zertifikat fuer {state['domain']} erneuert.")
+        log("cert", f"Zertifikat fuer {state['domain']} erneuert.")
         reload_nginx()
 
 

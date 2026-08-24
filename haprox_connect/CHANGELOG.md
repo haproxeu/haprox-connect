@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0
+
+- Heartbeat und Statusentitäten: `heartbeat.py` meldet sich periodisch
+  beim Relay (`http://`, Tunnel ist die Transportsicherheit) und setzt
+  fünf Statusentitäten über die Supervisor-API
+  (`binary_sensor.haprox_tunnel`, `binary_sensor.haprox_relay_reachable`,
+  `sensor.haprox_certificate_days`, `sensor.haprox_external_url`,
+  `sensor.haprox_status`), inklusive persistenter Benachrichtigung ab
+  7 Tagen Zertifikats-Restlaufzeit. `sensor.haprox_traffic_month` noch
+  nicht gesetzt (Datenquelle verschoben, siehe `STATUS.md` im
+  Relay-Repo). Gemeinsame Supervisor-/Logging-Helfer nach
+  `haprox_common.py` ausgelagert. (`addon.md` Abschnitt 11, Schritt 4
+  von 6.)
+
 ## 0.2.0
 
 - Zertifikat und nginx: `lego --dns acme-dns` bezieht das Standort-

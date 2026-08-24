@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bashio
+# Startet heartbeat.py (periodischer Heartbeat + Statusentitaeten, siehe
+# dort). Laeuft dauerhaft, daher kein `pause`-Trick noetig.
+bashio::log.info "Starte Heartbeat..."
+exec python3 /usr/bin/heartbeat.py
