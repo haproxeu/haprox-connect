@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.0
+
+- Setup-Fortschrittsanzeige: `sensor.haprox_status` zeigt waehrend der
+  Ersteinrichtung `setting_up_1_5` bis `setting_up_5_5` (Code wird
+  geprueft / Verbindung wird aufgebaut / Verbindung steht / Zertifikat
+  wird bezogen / Bereit), mit Attributen fuer einen Fortschrittsbalken
+  (`step`, `step_total`, `step_label`, `step_timeout_at`) statt einer
+  Blackbox waehrend der ein bis zwei Minuten dauernden Ersteinrichtung.
+  Bleibt eine Stufe zu lange stehen, wird das als `stuck: true` +
+  Klartext-Hinweis angezeigt und einmalig per `persistent_notification`
+  gemeldet -- der Vorgang selbst gibt dabei **nicht** auf und probiert
+  im Hintergrund weiter (Ausnahme: ein eindeutig ungueltiger Code stoppt
+  wirklich, mit einer Aufforderung, einen neuen zu besorgen). Bei
+  Abschluss (5/5) eine einmalige Erfolgsmeldung mit der fertigen
+  Adresse.
+- Echter Bug, mit-behoben: der "Standort zuruecksetzen"-Weg aus der
+  Management-UI (neuer Token fuer einen bestehenden Standort)
+  funktionierte bisher gar nicht -- `enroll.py` ueberspringt Enrollment
+  immer, sobald `/data/haprox.json` existiert, unabhaengig davon, ob ein
+  neuer Code eingetragen wurde. Erkennt jetzt einen neu eingetragenen
+  Code trotz bestehender Registrierung als Reset, verwirft den alten
+  Zustand und registriert neu.
+
 ## 0.4.8
 
 - Echter Bug, live gefunden bei der ersten laengeren Laufzeit auf einer

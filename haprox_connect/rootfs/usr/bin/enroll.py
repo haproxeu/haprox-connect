@@ -119,23 +119,36 @@ def enroll(options: dict) -> dict:
     addon_version = fetch_addon_version()
 
     delay = BACKOFF_START_SECONDS
+    start = time.monotonic()
     while True:
         try:
             response = post_enroll(enroll_url, token, public_key, ha_version, addon_version)
             break
         except InvalidToken:
+            # Einzige echte Ausnahme vom "niemals aufgeben"-Prinzip sonst
+            # ueberall in diesem Skript -- ein abgelehnter Code repariert
+            # sich nicht von selbst durch Warten, im Gegensatz zu einem
+            # unerreichbaren Relay.
             log(
                 "enroll",
                 "Der Code wurde nicht akzeptiert. Codes sind 30 Minuten gueltig "
                 "und koennen nur einmal verwendet werden. Lass dir einen neuen "
                 "Code geben.",
             )
+            haprox_common.mark_stuck(
+                "enroll", 1, "Code ungueltig oder abgelaufen -- neuen Code anfordern."
+            )
             sys.exit(1)
         except RateLimited:
             log("enroll", "Zu viele Versuche in kurzer Zeit. Bitte spaeter erneut versuchen.")
+            haprox_common.mark_stuck(
+                "enroll", 1, "Zu viele Versuche -- bitte spaeter erneut versuchen."
+            )
             sys.exit(1)
         except urllib.error.URLError as exc:
             log("enroll", f"Relay nicht erreichbar ({exc}). Versuche es in {delay}s erneut.")
+            if time.monotonic() - start > haprox_common.STEP_TIMEOUTS[1]:
+                haprox_common.mark_stuck("enroll", 1)
             time.sleep(delay)
             delay = min(delay * 2, BACKOFF_MAX_SECONDS)
 
@@ -156,13 +169,31 @@ def write_state_atomic(state: dict) -> None:
 
 
 def main() -> None:
-    if STATE_PATH.exists():
-        log("enroll", "Bereits registriert, ueberspringe Enrollment.")
-        return
-
     options = load_options()
+    token = options.get("enrollment_token", "").strip()
+
+    if STATE_PATH.exists():
+        if not token:
+            log("enroll", "Bereits registriert, ueberspringe Enrollment.")
+            return
+        # Echter Bug, mit-behoben: main() ueberprang Enrollment bisher IMMER,
+        # sobald der State existierte -- auch wenn ein neuer, gueltiger Token
+        # eingetragen war. Der "Zuruecksetzen"-Weg aus der Management-UI
+        # (neuer Token fuer denselben Standort) funktionierte dadurch nie,
+        # nur Deinstallieren/Neuinstallieren loeschte /data ungewollt mit.
+        log(
+            "enroll",
+            "Neuer Code trotz bestehender Registrierung -- Standort wird zurueckgesetzt.",
+        )
+        STATE_PATH.unlink()
+        haprox_common.clear_setup_progress()
+        haprox_common.dismiss_notification("haprox_setup_stuck", "enroll")
+        haprox_common.dismiss_notification("haprox_setup_complete", "enroll")
+
+    haprox_common.enter_step("enroll", 1)
     state = enroll(options)
     write_state_atomic(state)
+    haprox_common.enter_step("enroll", 2)  # Staffelstab an heartbeat.py uebergeben
     log("enroll", f"Standort registriert: {state['domain']}")
     clear_enrollment_token()
 
