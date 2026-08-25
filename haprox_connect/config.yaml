@@ -1,5 +1,5 @@
 name: haprox connect
-version: "0.4.7"
+version: "0.4.8"
 slug: haprox_connect
 description: Verbindet diese Home-Assistant-Instanz per WireGuard mit haprox.eu
 url: "https://github.com/haproxeu/haprox-connect"

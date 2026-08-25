@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.8
+
+- Echter Bug, live gefunden bei der ersten laengeren Laufzeit auf einer
+  echten Instanz: der Heartbeat-eigene `nginx_ok()`-Check oeffnete eine
+  nackte TCP-Verbindung zu `wg_ip:443` ohne PROXY-Protocol-Header, den
+  unser eigenes nginx (`proxy_protocol on`) aber zwingend erwartet --
+  Ergebnis war ein echter `[error] ... broken header while reading
+  PROXY protocol`-Eintrag bei **jedem einzelnen Heartbeat**, dauerhaft,
+  bei jeder Installation. Sendet jetzt `PROXY UNKNOWN\r\n` (der im
+  Standard vorgesehene Weg fuer Healthchecks ohne echte Client-Daten,
+  z.B. auch von AWS-Loadbalancern genutzt) -- Fehler verschwindet
+  komplett.
+- `access_log` fuer die Standort-Domain abgeschaltet -- wurde von
+  nichts in diesem Add-on gelesen, wuchs unbegrenzt (inklusive echter
+  Besucher-IPs/User-Agents), keine Rotation in diesem minimalen
+  Container.
+
 ## 0.4.7
 
 - Echter Bug, live gefunden bei der ersten vollstaendigen Installation

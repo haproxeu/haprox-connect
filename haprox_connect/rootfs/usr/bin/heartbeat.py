@@ -91,8 +91,16 @@ def tunnel_up() -> bool:
 
 
 def nginx_ok(wg_ip: str) -> bool:
+    """Echter Bug, live gefunden: eine nackte TCP-Verbindung ohne PROXY-
+    Protocol-Header liess unser eigenes nginx (`proxy_protocol on`) bei
+    jedem Heartbeat einen echten Fehler loggen ("broken header while
+    reading PROXY protocol") -- alle heartbeat_interval Sekunden, dauerhaft.
+    "PROXY UNKNOWN\\r\\n" ist der im Standard vorgesehene Weg, einen
+    Healthcheck ohne echte Client-Daten anzukuendigen (nutzen z.B. auch
+    AWS-Loadbalancer dafuer), nginx akzeptiert das ohne Fehlermeldung."""
     try:
-        with socket.create_connection((wg_ip, 443), timeout=3):
+        with socket.create_connection((wg_ip, 443), timeout=3) as sock:
+            sock.sendall(b"PROXY UNKNOWN\r\n")
             return True
     except OSError:
         return False

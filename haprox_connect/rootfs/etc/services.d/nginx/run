@@ -92,6 +92,11 @@ server {
     listen ${WG_IP}:443 ssl proxy_protocol;
     server_name ${DOMAIN};
 
+    # Wird von nichts in diesem Add-on gelesen und waechst sonst
+    # unbegrenzt (echte Besucher-IPs/User-Agents inklusive) -- niemand
+    # rotiert das in diesem minimalen Container.
+    access_log off;
+
     ssl_certificate     ${CERT_FILE};
     ssl_certificate_key ${KEY_FILE};
 
