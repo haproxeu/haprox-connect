@@ -31,10 +31,3 @@ unserer eigenen Prüfung (Stand: siehe Git-Historie dieser Datei).
 - s6-overlay/bashio kommen bereits fertig im Basis-Image
   `ghcr.io/hassio-addons/base`, das vom Home-Assistant-Community-Projekt
   gepflegt wird — wir bringen sie nicht selbst ein.
-
-## Was NICHT hierher gehört
-
-Der Code des Relay-Servers ist ein separates, privates Repository und
-wird nirgends an Kunden ausgeliefert — reiner interner Serverbetrieb,
-keine Distribution im lizenzrechtlichen Sinne, daher keine
-Attributionspflicht dafür.
