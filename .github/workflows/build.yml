@@ -25,15 +25,21 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: amd64
             platform: linux/amd64
+            runner: ubuntu-latest
           - arch: aarch64
             platform: linux/arm64
+            # Echter arm64-Runner statt QEMU-Emulation auf x86 -- kostenlos
+            # fuer oeffentliche Repos, seit August 2025 GA. QEMU-Emulation
+            # war der groesste Zeitfresser, gerade bei `go install lego`
+            # (rechenintensiv, unter Emulation vielfach langsamer).
+            runner: ubuntu-24.04-arm
 
     steps:
       - name: Code auschecken
@@ -54,9 +60,6 @@ jobs:
             exit 1
           fi
           echo "base=${BASE}" >> "$GITHUB_OUTPUT"
-
-      - name: QEMU einrichten (Cross-Arch-Builds)
-        uses: docker/setup-qemu-action@v4
 
       - name: Buildx einrichten
         uses: docker/setup-buildx-action@v4
@@ -79,3 +82,11 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.arch }}:${{ steps.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.arch }}:latest
+          # Layer-Cache pro Architektur getrennt (scope), sonst ueberschreiben
+          # sich amd64/aarch64 gegenseitig den Cache. Unveraenderte Layer
+          # (Basis-Image, apk add, der ganze go-install-lego-Schritt) werden
+          # dann wiederverwendet statt bei jedem Lauf neu gebaut zu werden --
+          # bei einer Aenderung, die nur ein rootfs-Skript betrifft, sind das
+          # praktisch alle Layer bis auf den letzten COPY-Schritt.
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
