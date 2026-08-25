@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.7
+
+- Echter Bug, live gefunden bei der ersten vollstaendigen Installation
+  auf einer echten HA-Supervised-Instanz: die Trusted-Proxies-Warnung
+  nannte nur `172.30.33.0/24` (das Supervisor-Docker-Netz). Laeuft der
+  homeassistant-Container selbst mit Host-Networking (typisch bei
+  "Supervised" auf generischem Linux statt echter HAOS), sieht HA Core
+  Anfragen von diesem -- ebenfalls host-genetzwerkten -- Add-on aber als
+  von `127.0.0.1` kommend, nicht vom Docker-Netz. Die alte Anleitung
+  konnte man in diesem Fall beliebig oft richtig eintragen, ohne dass
+  sich etwas aenderte. Warnung nennt jetzt beide Adressen
+  (`172.30.33.0/24` und `127.0.0.1/32`), schadlos fuer beide
+  Netzwerk-Situationen.
+
 ## 0.4.6
 
 - Echter Bug, live gefunden bei der ersten vollstaendigen Installation

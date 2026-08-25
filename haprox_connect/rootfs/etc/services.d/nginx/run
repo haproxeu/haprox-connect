@@ -29,14 +29,26 @@ fi
 ha_status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
     -H "X-Forwarded-For: 203.0.113.1" "http://127.0.0.1:${HA_CORE_PORT}/" || echo "000")
 if [ "${ha_status}" = "400" ]; then
+    # Echter Bug, live gefunden: auf "Supervised"-Installationen auf
+    # generischem Linux laeuft der homeassistant-Container oft selbst mit
+    # Host-Networking. Laeuft dann auch dieses Add-on mit Host-Networking
+    # (Pflicht fuer das WireGuard-Interface), sieht HA Core Anfragen von
+    # hier als von 127.0.0.1 kommend -- NICHT vom Supervisor-Docker-Netz
+    # 172.30.33.0/24. Beide Adressen eintragen deckt beide Faelle ab
+    # (echte HAOS mit eigenem Add-on-Netz UND host-genetzwerkte Core).
     bashio::log.warning "Home Assistant Core vertraut diesem Add-on noch nicht als Proxy (400 Bad Request)."
     bashio::log.warning "Fuege in der configuration.yaml folgenden Block ein (aeltere HA-Versionen):"
     bashio::log.warning "  http:"
     bashio::log.warning "    use_x_forwarded_for: true"
     bashio::log.warning "    trusted_proxies:"
     bashio::log.warning "      - 172.30.33.0/24"
+    bashio::log.warning "      - 127.0.0.1/32"
     bashio::log.warning "Oder (neuere HA-Versionen, UI): Einstellungen -> System -> Netzwerk ->"
-    bashio::log.warning "HTTP-Server -> 'Trust X-Forwarded-For' aktivieren, 172.30.33.0/24 eintragen."
+    bashio::log.warning "HTTP-Server -> 'Trust X-Forwarded-For' aktivieren, beide Adressen"
+    bashio::log.warning "172.30.33.0/24 und 127.0.0.1/32 bei 'Trusted proxies' eintragen."
+    bashio::log.warning "(Laeuft Home Assistant Core auf dieser Box ebenfalls mit Host-Networking"
+    bashio::log.warning "-- typisch bei 'Supervised' auf generischem Linux -- greift nur die"
+    bashio::log.warning "127.0.0.1/32-Adresse, die andere schadet aber nicht.)"
     bashio::log.warning "Ohne das schlagen Verbindungen ueber haprox.eu fehl, sobald das Zertifikat steht."
 fi
 
