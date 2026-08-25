@@ -73,7 +73,18 @@ Das Add-on legt folgende Entitäten an:
 | `binary_sensor.haprox_relay_reachable` | letzte Statusmeldung kam an |
 | `sensor.haprox_certificate_days` | Restlaufzeit des Zertifikats in Tagen |
 | `sensor.haprox_external_url` | deine externe Adresse |
-| `sensor.haprox_status` | `ok`, `cert_error` oder `tunnel_down` |
+| `sensor.haprox_status` | `ok`, `cert_error`, `tunnel_down` — oder waehrend der Ersteinrichtung `setting_up_1_5` bis `setting_up_5_5` |
+
+**Während der Ersteinrichtung** (dauert normalerweise ein bis zwei
+Minuten) durchläuft `sensor.haprox_status` fünf Stufen: Code wird
+geprüft → Verbindung wird aufgebaut → Verbindung steht → Zertifikat
+wird bezogen → Bereit. Die Attribute (`step`, `step_total`,
+`step_label`) eignen sich für einen Fortschrittsbalken. Bleibt eine
+Stufe zu lange stehen, zeigt die Entität `stuck: true` mit einem
+Klartext-Hinweis, und du bekommst einmalig eine Benachrichtigung — das
+Add-on gibt dabei nicht auf und versucht im Hintergrund weiter (siehe
+"Was bei Fehlern zu tun ist" unten für die Ausnahme: ein ungültiger
+Code).
 
 Läuft dein Zertifikat in weniger als 20 Tagen ab, erscheint eine
 Warnung im Add-on-Log. Unter 7 Tagen zusätzlich eine Benachrichtigung
