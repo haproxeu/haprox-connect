@@ -8,13 +8,26 @@
 STATE_FILE="${HAPROX_STATE_PATH:-/data/haprox.json}"
 LEGO_PATH="${HAPROX_LEGO_PATH:-/data/lego}"
 
+# --- 0) HA-Core-Port von der Supervisor-API abfragen --------------------
+# Echter Bug, live gefunden: HA Core hoert nicht ueberall auf 8123 --
+# auf dieser Test-VM (Supervised auf generischem Debian statt HAOS)
+# laeuft es auf Port 80. Der fest verdrahtete Port fuehrte dort zu einem
+# echten "502 Bad Gateway", weil niemand auf 127.0.0.1:8123 lauschte.
+# /core/info kennt den tatsaechlichen Port, Fallback 8123 nur falls die
+# Abfrage selbst fehlschlaegt.
+HA_CORE_PORT=$(curl -s -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    http://supervisor/core/info | jq -r '.data.port // 8123')
+if [ -z "${HA_CORE_PORT}" ] || [ "${HA_CORE_PORT}" = "null" ]; then
+    HA_CORE_PORT=8123
+fi
+
 # --- 1) HA-Core-Trusted-Proxies-Check ---------------------------------
 # configuration.yaml wird NICHT geparst (HA migriert das gerade uneinheitlich ins UI) --
 # stattdessen empirisch pruefen, ob HA Core einen Request mit
 # X-Forwarded-For (genau das, was unser eigenes nginx gleich schickt)
 # mit 400 ablehnt.
 ha_status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
-    -H "X-Forwarded-For: 203.0.113.1" http://127.0.0.1:8123/ || echo "000")
+    -H "X-Forwarded-For: 203.0.113.1" "http://127.0.0.1:${HA_CORE_PORT}/" || echo "000")
 if [ "${ha_status}" = "400" ]; then
     bashio::log.warning "Home Assistant Core vertraut diesem Add-on noch nicht als Proxy (400 Bad Request)."
     bashio::log.warning "Fuege in der configuration.yaml folgenden Block ein (aeltere HA-Versionen):"
@@ -74,7 +87,7 @@ server {
     real_ip_header proxy_protocol;
 
     location / {
-        proxy_pass http://127.0.0.1:8123;
+        proxy_pass http://127.0.0.1:${HA_CORE_PORT};
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$remote_addr;
         proxy_set_header X-Forwarded-Proto https;
@@ -82,5 +95,5 @@ server {
 }
 EOF
 
-bashio::log.info "Starte nginx (${DOMAIN} -> 127.0.0.1:8123)..."
+bashio::log.info "Starte nginx (${DOMAIN} -> 127.0.0.1:${HA_CORE_PORT})..."
 exec nginx -g "daemon off;"

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.6
+
+- Echter Bug, live gefunden bei der ersten vollstaendigen Installation
+  auf einer echten HA-Supervised-Instanz: nginx proxyte fest verdrahtet
+  auf `127.0.0.1:8123`. Auf dieser Instanz (Supervised auf generischem
+  Debian statt HAOS) lief HA Core aber auf Port 80 -- Ergebnis war ein
+  echter `502 Bad Gateway` fuer jeden Verbindungsversuch ueber die
+  haprox.eu-Adresse, obwohl Tunnel, Zertifikat und Enrollment
+  einwandfrei liefen. `nginx/run` fragt den tatsaechlichen Port jetzt
+  vorher bei der Supervisor-API ab (`/core/info`), Fallback 8123 nur
+  falls diese Abfrage selbst fehlschlaegt.
+
 ## 0.4.5
 
 - WireGuard-Interface heisst jetzt `wghaprox` statt `wg0`. Grund: das
