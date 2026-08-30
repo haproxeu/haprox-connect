@@ -145,7 +145,21 @@ def enroll(options: dict) -> dict:
                 "enroll", 1, "Zu viele Versuche -- bitte spaeter erneut versuchen."
             )
             sys.exit(1)
-        except urllib.error.URLError as exc:
+        except (urllib.error.URLError, OSError) as exc:
+            # Echter Bug, live gefunden (zweimal auf zwei echten Boxen):
+            # urllib wickelt NICHT jeden Netzwerkfehler in URLError ein --
+            # schlaegt das Senden der Anfrage fehl, schon; timet aber das
+            # Warten auf die Antwort aus (Anfrage kam beim Relay an, die
+            # Antwort nur nicht rechtzeitig zurueck), wirft es einen rohen
+            # socket.timeout/OSError. Der fiel bisher durch dieses except
+            # durch, liess enroll.py mit einem unbehandelten Traceback
+            # abstuerzen -- und weil das Relay die Anfrage bereits
+            # verarbeitet und den Token verbraucht hatte, schlug jeder
+            # automatische Neustart-Versuch mit demselben (jetzt
+            # verbrauchten) Code fehl -- der Standort existierte relayseitig
+            # bereits, aber die Box hatte nichts. Nur ausgeloest durch
+            # diesen Bug, nicht durch eine echte, unvermeidbare
+            # Netzwerkstoerung.
             log("enroll", f"Relay nicht erreichbar ({exc}). Versuche es in {delay}s erneut.")
             if time.monotonic() - start > haprox_common.STEP_TIMEOUTS[1]:
                 haprox_common.mark_stuck("enroll", 1)

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.5.1
+
+- Echter, ernster Bug, live gefunden auf zwei echten Boxen hintereinander:
+  timet das *Warten auf die Antwort* des Enrollment-Requests aus (Anfrage
+  kam beim Relay an, die Antwort nur nicht rechtzeitig zurueck), wirft
+  Python einen rohen `socket.timeout`, den unser bisheriges `except
+  urllib.error.URLError` nicht auffing -- `enroll.py` stuerzte mit einem
+  unbehandelten Traceback ab, der ganze Container startete nicht mehr.
+  Da das Relay die Anfrage bereits verarbeitet und den Code verbraucht
+  hatte, scheiterte jeder automatische Neustart-Versuch mit demselben
+  (jetzt ungueltigen) Code -- der Standort existierte relayseitig
+  bereits, die Box aber wusste nichts davon. Ueber das echte
+  Redemption-Log auf dem Relay bestaetigt (zwei erfolgreiche Einlösungen,
+  gefolgt von "Code ungueltig" bei jedem Neustart-Versuch). Fängt jetzt
+  auch rohe Netzwerkfehler ab und retried wie vorgesehen, statt
+  abzustürzen.
+
 ## 0.5.0
 
 - Setup-Fortschrittsanzeige: `sensor.haprox_status` zeigt waehrend der
