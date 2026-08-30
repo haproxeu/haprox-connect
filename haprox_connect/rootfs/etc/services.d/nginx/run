@@ -108,6 +108,21 @@ server {
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$remote_addr;
         proxy_set_header X-Forwarded-Proto https;
+
+        # Echter Bug, live gefunden: ohne Upgrade/Connection-Header kann
+        # nginx die WebSocket-Verbindung (/api/websocket) nicht
+        # durchreichen, auf die die Companion-App (und das Frontend fuer
+        # Live-Updates) zwingend angewiesen ist. Normale HTTP-Requests
+        # (Login-Seite, REST) liefen deshalb weiterhin einwandfrei --
+        # nur die App haengt in einer "Failed to connect"-Schleife, weil
+        # sie nie eine funktionierende Websocket-Verbindung bekommt.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        # Default (60s) killt eine idle liegende Websocket-Verbindung
+        # zwischen Events -- HA haelt sie oft laenger offen.
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
     }
 }
 EOF

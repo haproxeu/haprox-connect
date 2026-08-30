@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.2
+
+- Echter Bug, live gefunden: unser `nginx/run` leitete Requests an HA
+  Core zwar fuer normales HTTP durch, aber ohne `Upgrade`/`Connection`-
+  Header -- die WebSocket-Verbindung (`/api/websocket`), auf die die
+  Companion-App fuer den eigentlichen "verbunden"-Zustand zwingend
+  angewiesen ist, kam dadurch nie zustande. Login-Seite und normale
+  REST-Aufrufe im Browser funktionierten deshalb weiterhin
+  einwandfrei, nur die App haengte in einer endlosen
+  "Failed to connect"-Schleife. Ergaenzt `proxy_http_version 1.1` +
+  Upgrade-Header, dazu `proxy_read_timeout`/`proxy_send_timeout` auf
+  3600s hoch (der nginx-Standard von 60s haette eine laenger idle
+  liegende Websocket-Verbindung sonst weiterhin gekappt).
+
 ## 0.5.1
 
 - Echter, ernster Bug, live gefunden auf zwei echten Boxen hintereinander:
